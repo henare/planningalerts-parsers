@@ -1,28 +1,20 @@
-require 'info_master_scraper'
+require 'scraper'
+require 'cgi'
 
-class HawkesburyScraper < InfoMasterScraper
+class HawkesburyScraper < Scraper
   def applications(date)
-    base_path = "http://council.hawkesbury.nsw.gov.au/datracking/Modules/applicationmaster/"
-    base_url = base_path + "default.aspx"
-    raw_table_values(date, "#{base_url}?page=search", 1).map do |values|
-      
-      #Example description column in applications listing:
-      #NUM ROAD, SUBURB
-      #DESCRIPTION TEXT
+    url = "http://council.hawkesbury.nsw.gov.au/MasterViewUI/Modules/applicationmaster/default.aspx?page=found&1=#{date.strftime('%d/%m/%Y')}&2=#{date.strftime('%d/%m/%Y')}&3=&4=DA&4a=DA&6=F"
+    page = agent.get(url)
 
-      da = DevelopmentApplication.new(
-        :application_id => extract_application_id(values[1]),
-        :date_received => extract_date_received(values[2]),
-        :address => extract_address(values[3]),
-        :description => extract_description(values[3])
-      )
-      
-      application_number = da.application_id
-      application_year=""
-      
-      da.info_url = URI.escape(base_path + extract_info_url(values[0]))
-      da.comment_url = da.info_url
-      da
+    (page/'//*[@id="ctl00_cphContent_ctl01_ctl00_RadGrid1_ctl00"]').search("tbody/tr").map do |app|
+      application_id = app.at("td[2]").inner_text.strip
+      DevelopmentApplication.new(
+        :application_id => application_id,
+        :description => app.at("td[4]").inner_html.split('<br>')[1].strip,
+        :address => app.at("td[4]").inner_html.split('<br>')[0].strip,
+        :info_url => extract_relative_url(app),
+        :comment_url => email_url("council@hawkesbury.nsw.gov.au", "Development Application Enquiry: #{application_id}"),
+        :date_received => app.at("td[3]").inner_text.strip)
     end
   end
 end
