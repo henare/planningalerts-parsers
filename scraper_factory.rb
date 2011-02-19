@@ -115,7 +115,8 @@ module Scrapers
       TheHillsScraper.new("The Hills Shire Council", "The Hills", "NSW"),
       WaverleyScraper.new("Waverley Council", "Waverley", "NSW"),
       ScraperWikiScraper.new("Blue Mountains City Council", "Blue Mountains", "NSW", "blue-mountains-city-council-development-applicatio"),
-      ScraperWikiScraper.new("Bellingen Shire Council", "Bellingen", "NSW", "bellingen-shire-council-development-applications")
+      ScraperWikiScraper.new("Bellingen Shire Council", "Bellingen", "NSW", "bellingen-shire-council-development-applications"),
+      ScraperWikiScraper.new("City of Kingston", "Kingston", "VIC", "city_of_kingston_development_applications")
     ]
   end
   
